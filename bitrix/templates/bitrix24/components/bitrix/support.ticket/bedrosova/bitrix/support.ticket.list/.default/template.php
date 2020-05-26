@@ -28,7 +28,7 @@ $APPLICATION->IncludeComponent(
 		"HEADERS"=>array(
 			array("id"=>"LAMP", "name"=> GetMessage('SUP_LAMP'), "sort"=>"s_lamp", "default"=>true),
 			array("id"=>"ID", "name"=>GetMessage('SUP_ID'), "sort"=>"s_id", "default"=>true),
-			array("id"=>"OWNER_SID", "name"=>GetMessage('OWNER_SID'), "default"=>true),
+			array("id"=>"OWNER_SID", "name"=>"CRM entity", "default"=>true),
 			array("id"=>"TITLE", "name"=>GetMessage('SUP_TITLE'), "default"=>true),
 			array("id"=>"TIMESTAMP_X", "name"=>GetMessage('SUP_TIMESTAMP'), "sort"=>"s_timestamp_x", "default"=>true),
 			array("id"=>"MODIFIED_BY", "name"=>GetMessage('SUP_MODIFIED_BY'), "default"=>true),
