@@ -20,10 +20,10 @@ foreach($arResult['ROWS'] as $key=>$row){
 
 	$strTask='';
 	if ($TicketTaskMap[$row['data']['ID']]>0)
-		$strTask='<a href="/company/personal/user/'.$TicketRespMap[$row['data']['ID']].'/tasks/task/view/'.$TicketTaskMap[$row['data']['ID']].'/">Task >></a>';
+		$strTask='<a href="/company/personal/user/'.$TicketRespMap[$row['data']['ID']].'/tasks/task/view/'.$TicketTaskMap[$row['data']['ID']].'/">Task>></a>';
 	$strCont='';
 	if ($TicketContMap[$row['data']['ID']]>0)
-		$strCont='<a href="/crm/contact/details/'.$TicketContMap[$row['data']].'/">Contact >></a>';
+		$strCont='<a href="/crm/contact/details/'.$TicketContMap[$row['data']['ID']].'/">Contact>></a>';
 
 	$arResult['ROWS'][$key]['data']['OWNER_SID'].=$strTask." ".$strCont;
 
