@@ -1,5 +1,4 @@
 <?
-
 AddEventHandler("support", "OnAfterTicketAdd", array("MyClass", "OnAfterTicketAddHandler")); 
 //AddEventHandler("support", "OnAfterTicketUpdate", array("MyClass", "OnAfterTicketUpdateHandler"));
 //AddEventHandler("tasks", "OnBeforeTaskAdd", array("MyClass", "OnBeforeTaskAddHandler")); 
@@ -45,7 +44,33 @@ class MyClass
 		else{
 			//new contact creation
 			
-			AddMessage2Log($ContactID, "new contact created");
+			$ct=new CCrmContact(false);
+			$arNewContactParams = array('HAS_PHONE'=>'N');
+			$arNewContactParams['HAS_EMAIL']='Y';
+
+			$arNewContactParams['FM']['EMAIL'] = array(
+			   'n0' => array(
+				'VALUE_TYPE' => 'WORK',
+				'VALUE' => $sEmail,
+			   )
+			  );
+			  
+			$arNewContactParams['FULL_NAME']=$sEmail;
+			$arNewContactParams['LAST_NAME']=$sEmail;
+			$arNewContactParams['TYPE_ID'] ='CLIENT';
+			//$arParams['SOURCE_ID']= 'EMAIL';
+			//$arParams['OPENED'] = 'Y';
+
+
+			$ContactID=$ct->Add($arNewContactParams, true, array('DISABLE_USER_FIELD_CHECK' => true));
+
+			if ($ContactID){
+				AddMessage2Log($ContactID, "new contact created");
+			}
+			else{
+				AddMessage2Log($ct->LAST_ERROR, "contact creation error");
+			}
+			
 			$ResponsiblePersonID=1;
 		}
 		
@@ -94,3 +119,4 @@ class MyClass
     }*/
 	
 }// MyClass end
+?>
