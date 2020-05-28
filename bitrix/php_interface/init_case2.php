@@ -55,8 +55,8 @@ class MyClass
 			   )
 			  );
 			  
-			$arNewContactParams['FULL_NAME']=$sEmail;
-			$arNewContactParams['LAST_NAME']=$sEmail;
+			$arNewContactParams['FULL_NAME']=$arFields["MESSAGE_AUTHOR_SID"];
+			$arNewContactParams['LAST_NAME']=$arFields["MESSAGE_AUTHOR_SID"];
 			$arNewContactParams['TYPE_ID'] ='CLIENT';
 			//$arParams['SOURCE_ID']= 'EMAIL';
 			//$arParams['OPENED'] = 'Y';
@@ -78,7 +78,7 @@ class MyClass
 		if (CModule::IncludeModule("tasks") && $ContactID>0){
 			$arFieldsTask = Array(
 				"TITLE" => "Task for ticket ".$arFields['ID'],
-				"DESCRIPTION" => $arFields['MESSAGE']." /company/support/?ID=".$arFields['ID']."&edit=1",
+				"DESCRIPTION" => $arFields['MESSAGE'].' <a href="/company/support/?ID='.$arFields['ID'].'&edit=1">Ticket>></a>',
 				"RESPONSIBLE_ID" => $ResponsiblePersonID,
 				"UF_CRM_TASK" => array('C_'.$ContactID)
 				);
@@ -94,11 +94,34 @@ class MyClass
 			else
 			{
 				if($e = $APPLICATION->GetException())
-				AddMessage2Log($e->GetString(), "task creation error");
+					AddMessage2Log($e->GetString(), "task creation error");
 			}
 
 		}//tesk creation end	
+		
 		//create an item in the list with task and ticket relationship
+		
+		if(CModule::IncludeModule("iblock"))
+		   { 
+				$el = new CIBlockElement;
+
+				$PROP = array();
+				$PROP['TICKETID'] = $arFields['ID'];
+				$PROP['TASKID'] = $TaskID; 
+				$PROP['RESPONSIBLE'] = $ResponsiblePersonID;    
+				$PROP['CONTACTID'] = $ContactID;    				
+
+				$arLoadListArray = Array(
+				  "IBLOCK_ID"      => 18,
+				  "PROPERTY_VALUES"=> $PROP,
+				  "NAME"           => $sEmail." ".date(),
+				  );
+
+				if($ListItemID = $el->Add($arLoadListArray))
+					AddMessage2Log($ListItemID, "list item created");
+				else
+					AddMessage2Log($el->LAST_ERROR, "list item creation error");
+		   } 
 		
 	}//OnAfterTicketAddHandler end
 	
