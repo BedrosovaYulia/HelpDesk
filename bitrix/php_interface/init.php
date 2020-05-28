@@ -1,6 +1,6 @@
 <?
 AddEventHandler("support", "OnAfterTicketAdd", array("MyClass", "OnAfterTicketAddHandler")); 
-//AddEventHandler("support", "OnAfterTicketUpdate", array("MyClass", "OnAfterTicketUpdateHandler"));
+AddEventHandler("support", "OnAfterTicketUpdate", array("MyClass", "OnAfterTicketUpdateHandler"));
 //AddEventHandler("tasks", "OnBeforeTaskAdd", array("MyClass", "OnBeforeTaskAddHandler")); 
 
 class MyClass
@@ -135,11 +135,37 @@ class MyClass
 
 	//closing task if ticket closed
 	
-	/*function OnAfterTicketUpdateHandler($arFields)
+	function OnAfterTicketUpdateHandler($arFields)
     {
-	   define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-	   AddMessage2Log($arFields, "support_init_update");   
-    }*/
+		if ($arFields['CLOSE'] == 'Y'){ //if we just closed ticket
+			if(CModule::IncludeModule("iblock"))
+			{
+					define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+					AddMessage2Log($arFields, "support_init_update");   
+				   
+					$TicketTaskMap=array();
+
+					$arSelect = Array("ID", "IBLOCK_ID", "NAME", "PROPERTY_TICKETID", "PROPERTY_TASKID", "PROPERTY_RESPONSIBLE", "PROPERTY_CONTACTID");
+					$arFilter = Array("IBLOCK_ID"=>18);
+					$res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
+					while($ob = $res->GetNextElement()){ 
+						$arTicketTaskFields = $ob->GetFields();  
+
+						$TicketTaskMap[$arTicketTaskFields['PROPERTY_TICKETID_VALUE']]=$arTicketTaskFields['PROPERTY_TASKID_VALUE'];
+					}
+					
+					AddMessage2Log($TicketTaskMap, "ticket_task_map"); 
+					
+					//close task
+					
+					CModule::IncludeModule('tasks');
+					$arTaskFields = array('STATUS' => CTasks::STATE_COMPLETED); 
+					$oTaskItem = CTaskItem::getInstance($TicketTaskMap[(int)$arFields['ID']], 1);
+						$oTaskItem->update($arTaskFields);
+					
+			}
+		}
+    }
 	
 }// MyClass end
 ?>
