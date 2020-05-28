@@ -2,8 +2,8 @@
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
 
 $APPLICATION->IncludeComponent(
-	"bitrix:support.ticket.list", 
-	"", 
+	"bedrosova:support.ticket.list", 
+	"bedrosova", 
 	Array(
 		"TICKET_EDIT_TEMPLATE" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["ticket_edit"],
 		"TICKETS_PER_PAGE" => $arParams["TICKETS_PER_PAGE"],
