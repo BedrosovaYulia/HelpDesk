@@ -20,5 +20,7 @@ RESPONSIBLE
 CONTACTID
 
 In the init file, you need to replace the list ID with your list ID.
+
+If your system has custom required fields for the task or for contact, you need to either make them optional or edit the init file.
  
  https://bedrosova.blogspot.com/2015/10/24.html
