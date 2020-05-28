@@ -1,9 +1,7 @@
 <?
-if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
-
 $APPLICATION->IncludeComponent(
-	"bitrix:support.ticket.edit", 
-	"", 
+	"bedrosova:support.ticket.edit", 
+	"bedrosova", 
 	Array(
 		"ID" => $arResult["VARIABLES"]["ID"],
 		"TICKET_LIST_URL" => $arResult["FOLDER"].$arResult["URL_TEMPLATES"]["ticket_list"],
@@ -18,5 +16,4 @@ $APPLICATION->IncludeComponent(
 	$component,
 	array('HIDE_ICONS' => 'Y')
 );
-
 ?>

@@ -315,7 +315,34 @@ if (!empty($arResult["TICKET"])):
 	</tr>
 	<?endif?>
 
+	
+	<tr valign="middle">
+		<td id="edit_12" align="right" nowrap><?=GetMessage("SUP_RESPONSIBLE")?></td>
+		<td id="edit_13" nowrap>
+			<select id="RESPONSIBLE_USER_ID" name="RESPONSIBLE_USER_ID">";
+				<option value="NOT_REF"> </option>
+				<?
+				$str_RESPONSIBLE_USER_ID=$arResult["TICKET"]["RESPONSIBLE_USER_ID"];
+				$dbTeam = CTicket::GetSupportTeamList();
+				while ($arTeam = $dbTeam->Fetch())
+				{
+					$reference_id = $arTeam["REFERENCE_ID"];
+					$reference = $arTeam["REFERENCE"];
 
+					if($arTeam["ACTIVE"] == "Y" || $reference_id == $str_RESPONSIBLE_USER_ID)
+					{
+						echo "<option ";
+						if($reference_id == $str_RESPONSIBLE_USER_ID)
+							echo " selected ";
+						echo "value=\"".htmlspecialcharsbx($reference_id). "\">". htmlspecialcharsbx($reference)."</option>";
+					}
+				}
+				?>
+			</select>
+		</td>
+	</tr>
+	
+	
 
 	<?if (strlen($arResult["TICKET"]["DATE_CLOSE"])<=0):?>
 	<tr>
