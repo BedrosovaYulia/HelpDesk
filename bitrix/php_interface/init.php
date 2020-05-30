@@ -1,10 +1,12 @@
 <?
 AddEventHandler("support", "OnAfterTicketAdd", array("MyClass", "OnAfterTicketAddHandler")); 
 AddEventHandler("support", "OnAfterTicketUpdate", array("MyClass", "OnAfterTicketUpdateHandler"));
-//AddEventHandler("tasks", "OnBeforeTaskAdd", array("MyClass", "OnBeforeTaskAddHandler")); 
+AddEventHandler("tasks", "OnTaskUpdate", array("MyClass", "OnTaskUpdateHandler")); 
 
 class MyClass
 {
+	public static $disableHandler = false;
+	
 	function OnAfterTicketAddHandler($arFields)
     {
 		
@@ -128,16 +130,52 @@ class MyClass
 
 	//closing ticket is task closed
 
-		/*function OnBeforeTaskAddHandler($arFields)
+	function OnTaskUpdateHandler($TaskID)
     {
+	   
+	   //$disableHandler ?
+	   
 	   define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-	   AddMessage2Log($arFields, "task_add");
-    }*/
+	   AddMessage2Log($TaskID, "task_updated");
+	   
+	   if (CModule::IncludeModule("tasks"))
+		{
+			$rsTask = CTasks::GetByID($TaskID);
+			if ($arTask = $rsTask->GetNext())
+			{
+				AddMessage2Log($arTask['STATUS'], "task_status");
+				AddMessage2Log($arTask['RESPONSIBLE_ID'], "task_responsible");
+				//change ticket responsible and status
+				if (CModule::IncludeModule("support")){
+
+					$arFields = array(
+						"RESPONSIBLE_USER_ID" => $arTask['RESPONSIBLE_ID'],
+						//"CLOSE" => "Y",
+						);
+						
+						if ($arTask['STATUS']==CTasks::STATE_COMPLETED)
+							$arFields["CLOSE"]="Y";
+						else $arFields["CLOSE"]="N";
+						
+						//add map task ticket
+
+						CTicket::Set($arFields, $MID, $id=28, $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
+						AddMessage2Log($arFields, "ticket_updated_after_task_updated");
+						
+						//updating responsible in List
+					}
+				}
+		}
+	   
+    }
 
 	//closing task if ticket closed
 
 	function OnAfterTicketUpdateHandler($arFields)
     {
+		if (self::$disableHandler)
+            return;
+		
 		if ($arFields['CLOSE'] == 'Y'){ //if we just closed ticket
 			if(CModule::IncludeModule("iblock"))
 			{
@@ -156,13 +194,16 @@ class MyClass
 					}
 
 					AddMessage2Log($TicketTaskMap, "ticket_task_map"); 
-
+					
+					//add opening task and responsible updating
 					//close task
-
+					self::$disableHandler = true;
 					CModule::IncludeModule('tasks');
 					$arTaskFields = array('STATUS' => CTasks::STATE_COMPLETED); 
 					$oTaskItem = CTaskItem::getInstance($TicketTaskMap[(int)$arFields['ID']], 1);
-						$oTaskItem->update($arTaskFields);
+					$oTaskItem->update($arTaskFields);
+					
+					//add responsible updating in the list
 
 			}
 		}
