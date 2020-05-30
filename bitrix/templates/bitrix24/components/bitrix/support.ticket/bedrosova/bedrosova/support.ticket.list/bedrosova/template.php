@@ -6,9 +6,9 @@ $bAdmin = (CTicket::IsAdmin()) ? "Y" : "N";
 $bSupportTeam = (CTicket::IsSupportTeam()) ? "Y" : "N";
 $bADS = $bDemo == 'Y' || $bAdmin == 'Y' || $bSupportTeam == 'Y';
 
-/*print "<pre>";
-print_r($arResult['ROWS']);
-print "</pre>"*/
+//print "<pre>";
+//print_r($arResult['ROWS']);
+//print "</pre>";
 
 ?>
 
@@ -24,7 +24,7 @@ print "</pre>"*/
 
 $APPLICATION->IncludeComponent(
 	"bitrix:main.interface.grid",
-	"support",
+	"",
 	array(
 		"GRID_ID"=>$arResult["GRID_ID"],
 		"HEADERS"=>array(

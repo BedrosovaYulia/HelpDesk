@@ -1,10 +1,13 @@
 <?
+
+
+
 $TicketTaskMap=array();
 $TicketRespMap=array();
 $TicketContMap=array();
 
 $arSelect = Array("ID", "IBLOCK_ID", "NAME", "PROPERTY_TICKETID", "PROPERTY_TASKID", "PROPERTY_RESPONSIBLE", "PROPERTY_CONTACTID");
-$arFilter = Array("IBLOCK_ID"=>18);
+$arFilter = Array("IBLOCK_ID"=>25);
 $res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
 while($ob = $res->GetNextElement()){ 
 	$arFields = $ob->GetFields();  
@@ -16,16 +19,19 @@ while($ob = $res->GetNextElement()){
 }
 
 foreach($arResult['ROWS'] as $key=>$row){
-	$arResult['ROWS'][$key]['data']['OWNER_SID']='';
+	//$arResult['ROWS'][$key]['data']['OWNER_SID']='';
 
-	$strTask='';
-	if ($TicketTaskMap[$row['data']['ID']]>0)
-		$strTask='<a href="/company/personal/user/'.$TicketRespMap[$row['data']['ID']].'/tasks/task/view/'.$TicketTaskMap[$row['data']['ID']].'/">Task>></a>';
-	$strCont='';
-	if ($TicketContMap[$row['data']['ID']]>0)
-		$strCont='<a href="/crm/contact/details/'.$TicketContMap[$row['data']['ID']].'/">Contact>></a>';
+	if (!empty($TicketTaskMap)){
+		$strTask='';
+		if ($TicketTaskMap[$row['data']['ID']]>0)
+			$strTask='<a href="/company/personal/user/'.$TicketRespMap[$row['data']['ID']].'/tasks/task/view/'.$TicketTaskMap[$row['data']['ID']].'/">Task>></a>';
+		$strCont='';
+		if ($TicketContMap[$row['data']['ID']]>0)
+			$strCont='<a href="/crm/contact/details/'.$TicketContMap[$row['data']['ID']].'/">Contact>></a>';
 
-	$arResult['ROWS'][$key]['data']['OWNER_SID'].=$strTask." ".$strCont;
+		$arResult['ROWS'][$key]['data']['OWNER_SID'].="<br/>".$strTask." ".$strCont;
+	}
 
 }
+
 ?>
