@@ -218,7 +218,17 @@ class HelpDeskExtension
 		if ($TaskID>0){
 			
 			define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-			AddMessage2Log($arFields, "support_init_update"); 
+			AddMessage2Log($arFields, "support_init_update");
+
+			//get ticket details
+			$ResponsiblePersonID=1;
+			if (CModule::IncludeModule("support")){
+				$rsTicket=CTicket::GetByID((int)$arFields['ID']);
+				if ($arTicket = $rsTicket->GetNext()){
+						$ResponsiblePersonID=$arTicket['RESPONSIBLE_USER_ID'];
+						AddMessage2Log($arTicket['RESPONSIBLE_USER_ID'], "responsible from ticket");
+					}
+				}
 			
 			if (CModule::IncludeModule('tasks')){
 			
@@ -228,6 +238,8 @@ class HelpDeskExtension
 				else{ //opening task	
 					$arTaskFields = array('STATUS' => CTasks::STATE_IN_PROGRESS); 
 				}
+				
+				$arTaskFields['RESPONSIBLE_ID']=$ResponsiblePersonID;
 				
 				self::$disableHandler = true;
 				$oTaskItem = CTaskItem::getInstance($TaskID, 1);
