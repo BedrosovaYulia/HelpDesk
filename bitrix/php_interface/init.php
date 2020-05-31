@@ -1,11 +1,48 @@
 <?
-AddEventHandler("support", "OnAfterTicketAdd", array("MyClass", "OnAfterTicketAddHandler")); 
-AddEventHandler("support", "OnAfterTicketUpdate", array("MyClass", "OnAfterTicketUpdateHandler"));
-AddEventHandler("tasks", "OnTaskUpdate", array("MyClass", "OnTaskUpdateHandler")); 
+AddEventHandler("support", "OnAfterTicketAdd", array("HelpDeskExtension", "OnAfterTicketAddHandler")); 
+AddEventHandler("support", "OnAfterTicketUpdate", array("HelpDeskExtension", "OnAfterTicketUpdateHandler"));
+AddEventHandler("tasks", "OnTaskUpdate", array("HelpDeskExtension", "OnTaskUpdateHandler")); 
 
-class MyClass
+class HelpDeskExtension
 {
 	public static $disableHandler = false;
+	
+	function GetTicketIDByTask($TaskID,$MapIblockID){
+		if(CModule::IncludeModule("iblock"))
+			{
+					$TicketTaskMap=array();
+					$arSelect = Array("ID", "IBLOCK_ID", "NAME", "PROPERTY_TICKETID", "PROPERTY_TASKID", "PROPERTY_RESPONSIBLE", "PROPERTY_CONTACTID");
+					$arFilter = Array("IBLOCK_ID"=>$MapIblockID);
+					$res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
+					while($ob = $res->GetNextElement()){ 
+						$arTicketTaskFields = $ob->GetFields();  
+						$TicketTaskMap[$arTicketTaskFields['PROPERTY_TASKID_VALUE']]=$arTicketTaskFields['PROPERTY_TICKETID_VALUE'];
+					}
+				if (isset($TicketTaskMap[$TaskID]))
+					return $TicketTaskMap[$TaskID];
+				else return -1;
+			}
+		else return -1;
+	}
+	
+	function GetTaskIDByTicket($TicketID,$MapIblockID){
+		if(CModule::IncludeModule("iblock"))
+			{
+					$TicketTaskMap=array();
+					$arSelect = Array("ID", "IBLOCK_ID", "NAME", "PROPERTY_TICKETID", "PROPERTY_TASKID", "PROPERTY_RESPONSIBLE", "PROPERTY_CONTACTID");
+					$arFilter = Array("IBLOCK_ID"=>$MapIblockID);
+					$res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
+					while($ob = $res->GetNextElement()){ 
+						$arTicketTaskFields = $ob->GetFields();  
+						$TicketTaskMap[$arTicketTaskFields['PROPERTY_TICKETID_VALUE']]=$arTicketTaskFields['PROPERTY_TASKID_VALUE'];
+					}
+
+				if (isset($TicketTaskMap[$TicketID]))
+					return $TicketTaskMap[$TicketID];
+				else return -1;
+			}
+		else return -1;
+	}
 	
 	function OnAfterTicketAddHandler($arFields)
     {
@@ -135,39 +172,39 @@ class MyClass
 	   
 	   //$disableHandler ?
 	   
-	   define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-	   AddMessage2Log($TaskID, "task_updated");
-	   
-	   if (CModule::IncludeModule("tasks"))
-		{
-			$rsTask = CTasks::GetByID($TaskID);
-			if ($arTask = $rsTask->GetNext())
+		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+		AddMessage2Log($TaskID, "task_updated");
+		$TicketID=self::GetTicketIDByTask($TaskID,25);
+		if ($TicketID>0){
+			if (CModule::IncludeModule("tasks"))
 			{
-				AddMessage2Log($arTask['STATUS'], "task_status");
-				AddMessage2Log($arTask['RESPONSIBLE_ID'], "task_responsible");
-				//change ticket responsible and status
-				if (CModule::IncludeModule("support")){
-
-					$arFields = array(
-						"RESPONSIBLE_USER_ID" => $arTask['RESPONSIBLE_ID'],
-						//"CLOSE" => "Y",
-						);
-						
+				$rsTask = CTasks::GetByID($TaskID);
+				if ($arTask = $rsTask->GetNext())
+				{	
+					AddMessage2Log($arTask['STATUS'], "task_status");
+					AddMessage2Log($arTask['RESPONSIBLE_ID'], "task_responsible");
+					//change ticket responsible and status
+					if (CModule::IncludeModule("support")){
+						$arFields = array(
+							"RESPONSIBLE_USER_ID" => $arTask['RESPONSIBLE_ID'],
+							//"CLOSE" => "Y",
+							);	
 						if ($arTask['STATUS']==CTasks::STATE_COMPLETED)
 							$arFields["CLOSE"]="Y";
-						else $arFields["CLOSE"]="N";
-						
-						//add map task ticket
-
-						CTicket::Set($arFields, $MID, $id=28, $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
+						else $arFields["CLOSE"]="N";	
+						CTicket::Set($arFields, $MID, $id=$TicketID, $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
 						AddMessage2Log($arFields, "ticket_updated_after_task_updated");
-						
 						//updating responsible in List
-					}
-				}
+							
+							
+					}//if support module end
+				}// if task details end
+			}// if module tasks end
+		}//If the task is attached to a ticket end  
+		else{
+			AddMessage2Log("ticket not found", "ticket_not_found_after_task_updated");
 		}
-	   
-    }
+    }//OnTaskUpdateHandler end
 
 	//closing task if ticket closed
 
@@ -176,36 +213,31 @@ class MyClass
 		if (self::$disableHandler)
             return;
 		
-		if ($arFields['CLOSE'] == 'Y'){ //if we just closed ticket
-			if(CModule::IncludeModule("iblock"))
-			{
-					define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-					AddMessage2Log($arFields, "support_init_update");   
-
-					$TicketTaskMap=array();
-
-					$arSelect = Array("ID", "IBLOCK_ID", "NAME", "PROPERTY_TICKETID", "PROPERTY_TASKID", "PROPERTY_RESPONSIBLE", "PROPERTY_CONTACTID");
-					$arFilter = Array("IBLOCK_ID"=>25);
-					$res = CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
-					while($ob = $res->GetNextElement()){ 
-						$arTicketTaskFields = $ob->GetFields();  
-
-						$TicketTaskMap[$arTicketTaskFields['PROPERTY_TICKETID_VALUE']]=$arTicketTaskFields['PROPERTY_TASKID_VALUE'];
-					}
-
-					AddMessage2Log($TicketTaskMap, "ticket_task_map"); 
-					
-					//add opening task and responsible updating
-					//close task
-					self::$disableHandler = true;
-					CModule::IncludeModule('tasks');
+		$TaskID=self::GetTaskIDByTicket((int)$arFields['ID'],25);
+		if ($TaskID>0){
+			
+			define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+			AddMessage2Log($arFields, "support_init_update"); 
+			
+			if (CModule::IncludeModule('tasks')){
+			
+				if ($arFields['CLOSE'] == 'Y'){ //closing task						
 					$arTaskFields = array('STATUS' => CTasks::STATE_COMPLETED); 
-					$oTaskItem = CTaskItem::getInstance($TicketTaskMap[(int)$arFields['ID']], 1);
-					$oTaskItem->update($arTaskFields);
-					
-					//add responsible updating in the list
-
-			}
+				}
+				else{ //opening task	
+					$arTaskFields = array('STATUS' => CTasks::STATE_IN_PROGRESS); 
+				}
+				
+				self::$disableHandler = true;
+				$oTaskItem = CTaskItem::getInstance($TaskID, 1);
+				$oTaskItem->update($arTaskFields);
+							
+				//add responsible updating in the list
+				
+			}// if module task end
+		}//TaskID>0 end
+		else{
+			AddMessage2Log("task not found", "task_not_found_after_ticket_updated");
 		}
     }
 
