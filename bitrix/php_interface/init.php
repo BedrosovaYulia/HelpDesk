@@ -194,7 +194,7 @@ class HelpDeskExtension
 						if ($arTask['STATUS']==CTasks::STATE_COMPLETED)
 							$arFields["CLOSE"]="Y";
 						else $arFields["CLOSE"]="N";	
-						$$arFields["RESPONSIBLE_USER_ID"]=$arTask['RESPONSIBLE_ID'];
+						$arFields["RESPONSIBLE_USER_ID"]=$arTask['RESPONSIBLE_ID'];
 						CTicket::Set($arFields, $MID, $id=$TicketID, $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
 						AddMessage2Log($arFields, "ticket_updated_after_task_updated");
 						//updating responsible in List
