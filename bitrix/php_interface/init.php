@@ -2,6 +2,8 @@
 AddEventHandler("support", "OnAfterTicketAdd", array("HelpDeskExtension", "OnAfterTicketAddHandler")); 
 AddEventHandler("support", "OnAfterTicketUpdate", array("HelpDeskExtension", "OnAfterTicketUpdateHandler"));
 AddEventHandler("tasks", "OnTaskUpdate", array("HelpDeskExtension", "OnTaskUpdateHandler")); 
+AddEventHandler("support", "OnBeforeSendMailToAuthor", array("HelpDeskExtension", "OnBeforeSendMailToAuthorHandler")); 
+
 
 class HelpDeskExtension
 {
@@ -207,7 +209,6 @@ class HelpDeskExtension
 		}
     }//OnTaskUpdateHandler end
 
-	//closing task if ticket closed
 
 	function OnAfterTicketUpdateHandler($arFields)
     {
@@ -253,6 +254,32 @@ class HelpDeskExtension
 			AddMessage2Log("task not found", "task_not_found_after_ticket_updated");
 		}
     }
+	
+	function OnBeforeSendMailToAuthorHandler($arFields, $is_new) {
+		
+		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+		AddMessage2Log($is_new, "is_new");
+		AddMessage2Log($arFields, "before_send_mail");
+		
+		if ($is_new ) return $arFields;
+		if (strlen($arFields['MESSAGE_BODY'])>0) return $arFields;
+		
+		return;
+		
+		/*if ($is_new or $arFields['WHAT_CHANGE']=='< message added >'){
+			//if(CModule::IncludeModule("support")){  
+				 
+				 //$set = CTicket::GetByID($arFields["ID"]);
+				 //$item = $set->Fetch();
+				 //AddMessage2Log($item, "before_send_mail");
+				 AddMessage2Log("sent", "before_send_mail");
+				 
+			  //} 
+			  return $arFields;
+			}
+		else return;*/
+	}
+	
 
 }// MyClass end
 ?>
