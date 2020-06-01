@@ -26,6 +26,12 @@ $arParams['SHOW_COUPON_FIELD'] = (array_key_exists('SHOW_COUPON_FIELD', $arParam
 
 if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["apply"])>0) && $_SERVER["REQUEST_METHOD"]=="POST" && check_bitrix_sessid())
 {
+	/*print "<pre>";
+	print_r($_REQUEST);
+	print "</pre>";
+	
+	die();*/
+	
 	$ID = intval($_REQUEST["ID"]);
 
 	if ($ID <=0)
@@ -104,6 +110,7 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["apply"])>0) && $_SERVER["R
 				'FILES'						=> $arFILES,
 				'COUPON'					=> $_REQUEST['COUPON'],
 				'PUBLIC_EDIT_URL'			=> $APPLICATION->GetCurPage(),
+				'RESPONSIBLE_USER_ID' => $_REQUEST['RESPONSIBLE_USER_ID']
 			);
 
 			foreach( $_REQUEST as $k => $v )
