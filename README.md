@@ -19,6 +19,12 @@ TASKID
 RESPONSIBLE
 CONTACTID
 
+And User Fields:
+
+SUPPORT	UF_TICKET_CLOSE_TASK	Да/Нет	100
+TASKS_TASK	UF_TICKET_LINK	Ссылка	100
+TASKS_TASK	UF_TASK_CLOSE_TICKET	Да/Нет	100
+
 In the init file, you need to replace the list ID with your list ID.
 
 If your system has custom required fields for the task or for contact, you need to either make them optional or edit the init file.
