@@ -8,7 +8,7 @@ AddEventHandler("support", "OnBeforeSendMailToAuthor", array("HelpDeskExtension"
 class HelpDeskExtension
 {
 	public static $disableHandler = false;
-	
+
 	function GetTicketIDByTask($TaskID,$MapIblockID){
 		if(CModule::IncludeModule("iblock"))
 			{
@@ -26,7 +26,7 @@ class HelpDeskExtension
 			}
 		else return -1;
 	}
-	
+
 	function GetTaskIDByTicket($TicketID,$MapIblockID){
 		if(CModule::IncludeModule("iblock"))
 			{
@@ -45,13 +45,13 @@ class HelpDeskExtension
 			}
 		else return -1;
 	}
-	
+
 	function OnAfterTicketAddHandler($arFields)
     {
-		
+
 		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
 		AddMessage2Log($arFields, "support_init");
-	   
+
 		//Find existing contact
 		$pattern = "/[-a-z0-9!#$%&'*_`{|}~]+[-a-z0-9!#$%&'*_`{|}~\.=?]*@[a-zA-Z0-9_-]+[a-zA-Z0-9\._-]+/i";
 		$text = $arFields["MESSAGE_AUTHOR_SID"];
@@ -118,8 +118,8 @@ class HelpDeskExtension
 		//TaskCreation
 		if (CModule::IncludeModule("tasks") && $ContactID>0){
 			$arFieldsTask = Array(
-				"TITLE" => "Task for ticket ".$arFields['ID'],
-				"DESCRIPTION" => $arFields['MESSAGE'].' <a href="/company/support/?ID='.$arFields['ID'].'&edit=1">Ticket>></a>',
+				"TITLE" => "Helpdesk#".$arFields['ID']."-".$sEmail."-".$arFields['TITLE'],
+				"DESCRIPTION" => $arFields['MESSAGE'].' <a href="/company/helpdesk/?ID='.$arFields['ID'].'&edit=1">Ticket>></a>',
 				"RESPONSIBLE_ID" => $ResponsiblePersonID,
 				"UF_CRM_TASK" => array('C_'.$ContactID),
 				"GROUP_ID"=>2
