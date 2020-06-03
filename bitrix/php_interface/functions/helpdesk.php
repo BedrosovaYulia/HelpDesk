@@ -49,6 +49,7 @@ class HelpDeskExtension
 	function OnAfterTicketAddHandler($arFields)
     {
 
+		//no more automation task creation - if will need - just recomment
 		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
 		AddMessage2Log($arFields, "support_init");
 
@@ -183,18 +184,25 @@ class HelpDeskExtension
 				$rsTask = CTasks::GetByID($TaskID);
 				if ($arTask = $rsTask->GetNext())
 				{	
+					AddMessage2Log($arTask, "all_task_fields");
 					AddMessage2Log($arTask['STATUS'], "task_status");
 					AddMessage2Log($arTask['RESPONSIBLE_ID'], "task_responsible");
 					//change ticket responsible and status
 					if (CModule::IncludeModule("support")){
 						$arFields = array(
 							"RESPONSIBLE_USER_ID" => $arTask['RESPONSIBLE_ID'],
-							//"CLOSE" => "Y",
+							
 							);	
-						if ($arTask['STATUS']==CTasks::STATE_COMPLETED)
-							$arFields["CLOSE"]="Y";
-						else $arFields["CLOSE"]="N";	
+						
+						//check UF_TASK_CLOSE_TICKET
+						if ($arTask['UF_TASK_CLOSE_TICKET']==1){
+							if ($arTask['STATUS']==CTasks::STATE_COMPLETED)
+								$arFields["CLOSE"]="Y";
+							else $arFields["CLOSE"]="N";
+						}
+						
 						$arFields["RESPONSIBLE_USER_ID"]=$arTask['RESPONSIBLE_ID'];
+						
 						CTicket::Set($arFields, $MID, $id=$TicketID, $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
 						AddMessage2Log($arFields, "ticket_updated_after_task_updated");
 						//updating responsible in List
@@ -233,12 +241,18 @@ class HelpDeskExtension
 			
 			if (CModule::IncludeModule('tasks')){
 			
-				if ($arFields['CLOSE'] == 'Y'){ //closing task						
-					$arTaskFields = array('STATUS' => CTasks::STATE_COMPLETED); 
+			
+				//check UF_TICKET_CLOSE_TASK
+				if ($arFields['UF_TICKET_CLOSE_TASK']==1){
+					if ($arFields['CLOSE'] == 'Y'){ //closing task						
+						$arTaskFields = array('STATUS' => CTasks::STATE_COMPLETED); 
+					}
+					else{ //opening task	
+						$arTaskFields = array('STATUS' => CTasks::STATE_IN_PROGRESS); 
+					}
 				}
-				else{ //opening task	
-					$arTaskFields = array('STATUS' => CTasks::STATE_IN_PROGRESS); 
-				}
+				
+				
 				
 				$arTaskFields['RESPONSIBLE_ID']=$ResponsiblePersonID;
 				
