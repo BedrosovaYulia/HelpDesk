@@ -23,7 +23,7 @@ foreach($arResult['ROWS'] as $key=>$row){
 	//print $row['data']['RESPONSIBLE_LOGIN'];
 	//print $row['data']['LAST_MESSAGE_BY_SUPPORT_TEAM'];
 	
-	if ($row['data']['RESPONSIBLE_LOGIN']==$CurrentUser && $row['data']['LAST_MESSAGE_SID']==$row['data']['OWNER_SID']){
+	/*if ($row['data']['RESPONSIBLE_LOGIN']==$CurrentUser && $row['data']['LAST_MESSAGE_SID']==$row['data']['OWNER_SID']){
 		$arResult['ROWS'][$key]['data']['LAMP']="red";
 		$arResult['ROWS'][$key]['data']['~LAMP']="red";
 		$arResult['ROWS'][$key]['columns']['LAMP']='<div class="support-lamp-red" title=" last posted by a techsupport client (you are responsible)"></div>';
@@ -35,7 +35,7 @@ foreach($arResult['ROWS'] as $key=>$row){
 		$arResult['ROWS'][$key]['data']['~LAMP']="yellow";
 		//$arResult['ROWS'][$key]['columns']['LAMP']='<div class="support-lamp-red" title=" last posted by a techsupport client (you are responsible)"></div>';
 		$arResult['ROWS'][$key]['columns']['LAMP']='<div class="support-lamp-yellow" title=" last posted by a techsupport client (you are not responsible)"></div>';	
-	}
+	}*/
 
 	if (!empty($TicketTaskMap)){
 		$strTask='';
