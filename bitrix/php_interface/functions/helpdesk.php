@@ -184,7 +184,7 @@ class HelpDeskExtension
 				$rsTask = CTasks::GetByID($TaskID);
 				if ($arTask = $rsTask->GetNext())
 				{	
-					AddMessage2Log($arTask, "all_task_fields");
+					//AddMessage2Log($arTask, "all_task_fields");
 					AddMessage2Log($arTask['STATUS'], "task_status");
 					AddMessage2Log($arTask['RESPONSIBLE_ID'], "task_responsible");
 					//change ticket responsible and status
@@ -234,6 +234,7 @@ class HelpDeskExtension
 			if (CModule::IncludeModule("support")){
 				$rsTicket=CTicket::GetByID((int)$arFields['ID']);
 				if ($arTicket = $rsTicket->GetNext()){
+						AddMessage2Log($arTicket, "all_ticket_fields");
 						$ResponsiblePersonID=$arTicket['RESPONSIBLE_USER_ID'];
 						AddMessage2Log($arTicket['RESPONSIBLE_USER_ID'], "responsible from ticket");
 					}
@@ -250,6 +251,12 @@ class HelpDeskExtension
 					else{ //opening task	
 						$arTaskFields = array('STATUS' => CTasks::STATE_IN_PROGRESS); 
 					}
+				}
+				
+				//reopen task if ticket reopen by mail
+				if ($arFields['MODIFIED_MODULE_NAME']=='mail' && $arFields['CLOSE'] == 'N'){
+					$arTaskFields = array('STATUS' => CTasks::STATE_IN_PROGRESS); 
+					AddMessage2Log("task open by mail", "ticket update event");
 				}
 				
 				
