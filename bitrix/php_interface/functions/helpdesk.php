@@ -50,7 +50,7 @@ class HelpDeskExtension
     {
 
 		//no more automation task creation - if will need - just recomment
-		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+		/*define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
 		AddMessage2Log($arFields, "support_init");
 
 		//Find existing contact
@@ -164,7 +164,7 @@ class HelpDeskExtension
 					AddMessage2Log($ListItemID, "list item created");
 				else
 					AddMessage2Log($el->LAST_ERROR, "list item creation error");
-		   } 
+		   } */
 
 	}//OnAfterTicketAddHandler end
 
