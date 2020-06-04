@@ -24,7 +24,7 @@ $arParams["TICKET_EDIT_TEMPLATE"] = (strlen($arParams["TICKET_EDIT_TEMPLATE"]) >
 
 $arParams['SHOW_COUPON_FIELD'] = (array_key_exists('SHOW_COUPON_FIELD', $arParams) && $arParams['SHOW_COUPON_FIELD'] == 'Y') ? 'Y' : 'N';
 
-if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["apply"])>0) && $_SERVER["REQUEST_METHOD"]=="POST" && check_bitrix_sessid())
+if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strlen($_REQUEST["save_task_resp"])>0 || strlen($_REQUEST["apply"])>0) && $_SERVER["REQUEST_METHOD"]=="POST" && check_bitrix_sessid())
 {
 	/*print "<pre>";
 	print_r($_REQUEST);
@@ -112,6 +112,14 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["apply"])>0) && $_SERVER["R
 				'PUBLIC_EDIT_URL'			=> $APPLICATION->GetCurPage(),
 				'RESPONSIBLE_USER_ID' => $_REQUEST['RESPONSIBLE_USER_ID']
 			);
+			
+			
+			if (strlen($_REQUEST["save_task_me"])>0){
+				global $USER;
+				$arFields['RESPONSIBLE_USER_ID']=$USER->GetID();
+			}
+			
+			
 
 			foreach( $_REQUEST as $k => $v )
 			{
@@ -122,6 +130,159 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["apply"])>0) && $_SERVER["R
 			}
 
 			$ID = CTicket::SetTicket($arFields, $ID, "Y", $NOTIFY = "Y");
+			
+			
+			//**************************************create task if need****************************************
+			
+			if (strlen($_REQUEST["save_task_me"])>0 ||  strlen($_REQUEST["save_task_resp"])>0){
+				
+				$ResponsiblePersonID=$arFields['RESPONSIBLE_USER_ID'];
+				
+				CModule::IncludeModule("support");
+				$rsTicket=CTicket::GetByID($ID);
+				$arTicket = $rsTicket->GetNext();
+				
+				
+				
+				$arFields=$arTicket;
+				
+				print "<pre>";
+				print_r($arFields);
+				print "</pre>";
+				
+				
+				define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+				AddMessage2Log($arFields, "support_init");
+
+				//Find existing contact
+				$pattern = "/[-a-z0-9!#$%&'*_`{|}~]+[-a-z0-9!#$%&'*_`{|}~\.=?]*@[a-zA-Z0-9_-]+[a-zA-Z0-9\._-]+/i";
+				$text = $arFields["OWNER_SID"];
+				preg_match_all($pattern, $text, $result);
+				$r = array_unique(array_map(function ($i) { return $i[0]; }, $result));
+				$sEmail=$r[0];
+				
+				//print $sEmail."<br/>";
+				
+				AddMessage2Log($sEmail, "email");
+
+				$ContactID=-1;
+			
+
+				CModule::IncludeModule('crm');
+				$rsContact = CCrmFieldMulti::GetList(
+				   array(),
+				   array(
+					  'ENTITY_ID' => 'CONTACT', // looking for only on contacts
+					  "VALUE" => $sEmail,
+				   )
+				);
+				if($arContact = $rsContact->Fetch()) 
+				{
+					AddMessage2Log($arContact['ELEMENT_ID'], "first_finded_contact_id");
+					$ContactID=$arContact['ELEMENT_ID'];
+					//find Contact details
+					/*$ContactDetails = CCrmContact::GetByID($ContactID);
+					if(!empty($ContactDetails))
+					{
+						$ResponsiblePersonID=$ContactDetails['ASSIGNED_BY_ID']; 	
+					}*/
+				}
+				else{
+					//new contact creation
+
+					$ct=new CCrmContact(false);
+					$arNewContactParams = array('HAS_PHONE'=>'N');
+					$arNewContactParams['HAS_EMAIL']='Y';
+
+					$arNewContactParams['FM']['EMAIL'] = array(
+					   'n0' => array(
+						'VALUE_TYPE' => 'WORK',
+						'VALUE' => $sEmail,
+					   )
+					  );
+
+					$arNewContactParams['FULL_NAME']=$arFields["MESSAGE_AUTHOR_SID"];
+					$arNewContactParams['LAST_NAME']=$arFields["MESSAGE_AUTHOR_SID"];
+					$arNewContactParams['TYPE_ID'] ='CLIENT';
+					$arNewContactParams['ASSIGNED_BY_ID'] = $ResponsiblePersonID;
+			
+
+
+					$ContactID=$ct->Add($arNewContactParams, true, array('DISABLE_USER_FIELD_CHECK' => true));
+
+					if ($ContactID){
+						AddMessage2Log($ContactID, "new contact created");
+					}
+					else{
+						AddMessage2Log($ct->LAST_ERROR, "contact creation error");
+					}
+
+				}
+				
+				//print $ContactID."<br/>";
+				//print $ResponsiblePersonID."<br/>";
+				
+				//die();
+				
+				
+				//TaskCreation
+				if (CModule::IncludeModule("tasks") && $ContactID>0){
+					$arFieldsTask = Array(
+						"TITLE" => "Helpdesk#".$arFields['ID']."-".$sEmail."-".$arFields['TITLE'],
+						"DESCRIPTION" => $arFields['MESSAGE'].' <a href="/company/helpdesk/?ID='.$arFields['ID'].'&edit=1">Ticket>></a>',
+						"RESPONSIBLE_ID" => $ResponsiblePersonID,
+						"UF_CRM_TASK" => array('C_'.$ContactID),
+						"GROUP_ID"=>2
+						);
+
+					$obTask = new CTasks;
+					$TaskID = $obTask->Add($arFieldsTask);
+					$success = ($TaskID>0);
+
+					if($success)
+					{
+						AddMessage2Log($TaskID, "new task id");
+					}
+					else
+					{
+						if($e = $APPLICATION->GetException())
+							AddMessage2Log($e->GetString(), "task creation error");
+					}
+
+				}//tesk creation end	
+
+				//create an item in the list with task and ticket relationship
+
+				if(CModule::IncludeModule("iblock"))
+				   { 
+						$el = new CIBlockElement;
+
+						$PROP = array();
+						$PROP['TICKETID'] = $arFields['ID'];
+						$PROP['TASKID'] = $TaskID; 
+						$PROP['RESPONSIBLE'] = $ResponsiblePersonID;    
+						$PROP['CONTACTID'] = $ContactID;    				
+
+						$arLoadListArray = Array(
+						  "IBLOCK_ID"      => 25,
+						  "PROPERTY_VALUES"=> $PROP,
+						  "NAME"           => $sEmail." ".date(),
+						  );
+
+						if($ListItemID = $el->Add($arLoadListArray))
+							AddMessage2Log($ListItemID, "list item created");
+						else
+							AddMessage2Log($el->LAST_ERROR, "list item creation error");
+				   }
+			
+			
+			}
+			
+		
+			
+			//***********************end task creation*************************************************
+			
+			
 			if (intval($ID)>0)
 			{
 				if (strlen($_REQUEST["save"])>0)
