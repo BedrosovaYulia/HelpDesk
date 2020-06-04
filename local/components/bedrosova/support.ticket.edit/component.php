@@ -201,8 +201,8 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 					   )
 					  );
 
-					$arNewContactParams['FULL_NAME']=$arFields["MESSAGE_AUTHOR_SID"];
-					$arNewContactParams['LAST_NAME']=$arFields["MESSAGE_AUTHOR_SID"];
+					$arNewContactParams['FULL_NAME']=$arFields["~OWNER_SID"];
+					$arNewContactParams['LAST_NAME']=$arFields["~OWNER_SID"];
 					$arNewContactParams['TYPE_ID'] ='CLIENT';
 					$arNewContactParams['ASSIGNED_BY_ID'] = $ResponsiblePersonID;
 			
@@ -229,10 +229,11 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 				if (CModule::IncludeModule("tasks") && $ContactID>0){
 					$arFieldsTask = Array(
 						"TITLE" => "Helpdesk#".$arFields['ID']."-".$sEmail."-".$arFields['TITLE'],
-						"DESCRIPTION" => $arFields['MESSAGE'].' <a href="/company/helpdesk/?ID='.$arFields['ID'].'&edit=1">Ticket>></a>',
+						"DESCRIPTION" => $arFields['MESSAGE'],
 						"RESPONSIBLE_ID" => $ResponsiblePersonID,
 						"UF_CRM_TASK" => array('C_'.$ContactID),
-						"GROUP_ID"=>2
+						"GROUP_ID"=>2,
+						"UF_TICKET_LINK" => "https://".$_SERVER['SERVER_NAME']."/company/helpdesk/?ID=".$arFields['ID']."&edit=1",
 						);
 
 					$obTask = new CTasks;
