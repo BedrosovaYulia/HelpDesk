@@ -41,6 +41,8 @@ if (!empty($arResult["TICKET"])):
 	<tr>
 		<th><?=GetMessage("SUP_TICKET")?></th>
 	</tr>
+	
+	
 
 	<tr>
 		<td>
@@ -339,8 +341,42 @@ if (!empty($arResult["TICKET"])):
 				}
 				?>
 			</select>
+			
+			<br/>
+			
+			
+			
 		</td>
+		
 	</tr>
+	
+	
+	<tr valign="middle">
+		<td id="edit_12" align="right" nowrap>Assigned task</td>
+		<td id="edit_13" nowrap>
+		
+			<?if ($arResult['TICKET']['TASKID']>0){?>
+				<a href="/company/personal/user/<?=$arResult["TICKET"]["RESPONSIBLE_USER_ID"]?>/tasks/task/view/<?=$arResult['TICKET']['TASKID']?>/">Assigned task>></a>
+			<?}
+			
+			else{?>
+			
+			There is no assigned task:
+			
+				<input type="submit" name="save_task_me" value="Save, assign to me" />&nbsp;
+				<input type="submit" name="save_task_resp" value="Save, delegate to chosen responsible" />&nbsp;
+			
+		
+			<?}?>
+		</td>	
+	
+	</tr>
+
+
+
+
+
+
 	
 	
 
