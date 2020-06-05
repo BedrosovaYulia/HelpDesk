@@ -134,6 +134,19 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 			
 			//**************************************create task if need****************************************
 			
+			$rsMessage = CTicket::GetMessageList($by="s_id", $order="asc", array("TICKET_ID" => $ID), $CHECK_RIGHTS="N");
+			
+			$FirstMessage="";
+			if($arMessage = $rsMessage->GetNext())
+			{
+				/*print "<pre>";
+				print_r($arMessage['~MESSAGE']);
+				print "</pre>";*/
+				$FirstMessage=$arMessage['~MESSAGE'];
+			}
+			
+			//die();
+			
 			if (strlen($_REQUEST["save_task_me"])>0 ||  strlen($_REQUEST["save_task_resp"])>0){
 				
 				$ResponsiblePersonID=$arFields['RESPONSIBLE_USER_ID'];
@@ -229,7 +242,7 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 				if (CModule::IncludeModule("tasks") && $ContactID>0){
 					$arFieldsTask = Array(
 						"TITLE" => "Helpdesk#".$arFields['ID']."-".$sEmail."-".$arFields['TITLE'],
-						"DESCRIPTION" => $arFields['MESSAGE'],
+						"DESCRIPTION" => $FirstMessage,
 						"RESPONSIBLE_ID" => $ResponsiblePersonID,
 						"UF_CRM_TASK" => array('C_'.$ContactID),
 						"GROUP_ID"=>2,
