@@ -45,10 +45,46 @@ class HelpDeskExtension
 			}
 		else return -1;
 	}
+	
+	
 
 	function OnAfterTicketAddHandler($arFields)
     {
-
+		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+		AddMessage2Log($arFields, "after_ticket_add");
+		
+		$headerArr = explode("\n", $arFields['EXTERNAL_FIELD_1']);
+		foreach ($headerArr as $str) {
+		  if (strpos($str, 'Cc:') === 0) {
+			$cc = $str;
+		  }
+		}
+		
+		AddMessage2Log($cc, "before_ticket_add");
+		
+		$text=$arFields['EXTERNAL_FIELD_1'];
+		$pattern = "/[-a-z0-9!#$%&'*_`{|}~]+[-a-z0-9!#$%&'*_`{|}~\.=?]*@[a-zA-Z0-9_-]+[a-zA-Z0-9\._-]+/i";
+		preg_match_all($pattern, $cc, $result);
+		
+		AddMessage2Log($result, "before_ticket_add_emails");
+		
+		if (count($result[0])>0){
+			$bcc="";
+			foreach ($result[0] as $email){
+				if ($email!=$sEmail){
+					$bcc=$bcc.$email.", ";
+				}
+				
+			}
+			self::$disableHandler = true;
+			AddMessage2Log($bcc, "before_ticket_add_bcc");
+			
+			$arFields2['UF_TICKET_BCC']=$bcc;
+			CTicket::Set($arFields2, $MID, $id=$arFields['ID'], $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
+		}
+		
+		
+		
 		//no more automation task creation - if will need - just recomment
 		/*define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
 		AddMessage2Log($arFields, "support_init");
@@ -282,23 +318,24 @@ class HelpDeskExtension
 		AddMessage2Log($is_new, "is_new");
 		AddMessage2Log($arFields, "before_send_mail");
 		
+		
+		if(CModule::IncludeModule("support")){  
+				 
+				 $arParams["SET_SHOW_USER_FIELD_T"] = $UFAT;
+				 $set = CTicket::GetByID($arFields["ID"], SITE_ID, $check_rights = "N", $get_user_name = "N", $get_extra_names = "N", array( "SELECT" => array("UF_TICKET_BCC")));
+				 $item = $set->Fetch();
+				 AddMessage2Log($item, "before_send_mail");
+				 AddMessage2Log("sent", "before_send_mail");
+				 
+			  } 
+			  
+		$arFields["BCC"]=$item["UF_TICKET_BCC"];
+		
 		if ($is_new ) return $arFields;
 		if (strlen($arFields['MESSAGE_BODY'])>0) return $arFields;
 		
 		return;
 		
-		/*if ($is_new or $arFields['WHAT_CHANGE']=='< message added >'){
-			//if(CModule::IncludeModule("support")){  
-				 
-				 //$set = CTicket::GetByID($arFields["ID"]);
-				 //$item = $set->Fetch();
-				 //AddMessage2Log($item, "before_send_mail");
-				 AddMessage2Log("sent", "before_send_mail");
-				 
-			  //} 
-			  return $arFields;
-			}
-		else return;*/
 	}
 	
 
