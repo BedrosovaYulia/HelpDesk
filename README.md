@@ -32,6 +32,8 @@ TASKS_TASK	UF_TICKET_LINK	Ссылка	100
 
 TASKS_TASK	UF_TASK_CLOSE_TICKET	Да/Нет	100
 
+SUPPORT UF_TICKET_BCC text
+
 
 In the init file, you need to replace the list ID with your list ID.
 
