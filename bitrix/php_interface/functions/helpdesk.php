@@ -79,7 +79,7 @@ class HelpDeskExtension
 			self::$disableHandler = true;
 			AddMessage2Log($bcc, "before_ticket_add_bcc");
 			
-			$arFields2['UF_TICKET_BCC']=$bcc;
+			$arFields2['UF_TICKET_CC']=$bcc;
 			CTicket::Set($arFields2, $MID, $id=$arFields['ID'], $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
 		}
 		
@@ -322,14 +322,14 @@ class HelpDeskExtension
 		if(CModule::IncludeModule("support")){  
 				 
 				 $arParams["SET_SHOW_USER_FIELD_T"] = $UFAT;
-				 $set = CTicket::GetByID($arFields["ID"], SITE_ID, $check_rights = "N", $get_user_name = "N", $get_extra_names = "N", array( "SELECT" => array("UF_TICKET_BCC")));
+				 $set = CTicket::GetByID($arFields["ID"], SITE_ID, $check_rights = "N", $get_user_name = "N", $get_extra_names = "N", array( "SELECT" => array("UF_TICKET_CC")));
 				 $item = $set->Fetch();
 				 AddMessage2Log($item, "before_send_mail");
 				 AddMessage2Log("sent", "before_send_mail");
 				 
 			  } 
 			  
-		$arFields["BCC"]=$item["UF_TICKET_BCC"];
+		$arFields["BCC"]=$item["UF_TICKET_CC"];
 		
 		if ($is_new ) return $arFields;
 		if (strlen($arFields['MESSAGE_BODY'])>0) return $arFields;
