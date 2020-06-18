@@ -159,9 +159,9 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 				
 				$arFields=$arTicket;
 				
-				print "<pre>";
+				/*print "<pre>";
 				print_r($arFields);
-				print "</pre>";
+				print "</pre>";*/
 				
 				
 				define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
@@ -247,6 +247,7 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 						"UF_CRM_TASK" => array('C_'.$ContactID),
 						"GROUP_ID"=>2,
 						"UF_TICKET_LINK" => "https://".$_SERVER['SERVER_NAME']."/company/helpdesk/?ID=".$arFields['ID']."&edit=1",
+						"PRIORITY"=>2,
 						);
 
 					$obTask = new CTasks;
@@ -377,6 +378,11 @@ if( isset( $arParams["SET_SHOW_USER_FIELD"] ) )
 		}
 	}
 }
+
+/*print "<pre>";
+print_r($UFA );
+print "</pre>";*/
+
 $arParams["SET_SHOW_USER_FIELD_T"] = $UFAT;
 $rsTicket = CTicket::GetByID($arParams["ID"], SITE_ID, $check_rights = "Y", $get_user_name = "N", $get_extra_names = "N", array( "SELECT" => $UFA ) );
 
