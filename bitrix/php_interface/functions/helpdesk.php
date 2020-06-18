@@ -295,6 +295,14 @@ class HelpDeskExtension
 					AddMessage2Log("task open by mail", "ticket update event");
 				}
 				
+				//set task priority
+				if ($arFields['MODIFIED_MODULE_NAME']=='mail'){
+					$arTaskFields = array('PRIORITY' => 2); 
+				}
+				elseif($arTicket['LAST_MESSAGE_BY_SUPPORT_TEAM']=='Y'){
+					$arTaskFields = array('PRIORITY' => 0); 
+				}
+				
 				
 				
 				$arTaskFields['RESPONSIBLE_ID']=$ResponsiblePersonID;
