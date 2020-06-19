@@ -4,6 +4,12 @@ $APPLICATION->AddHeadScript($this->GetFolder() . '/ru/script.js');
 ?>
 <?=ShowError($arResult["ERROR_MESSAGE"]);?>
 
+<?
+/*print "<pre>";
+print_r($arResult);
+print "</pre>";*/
+?>
+
 
 <? 
 /*$hkInst=CHotKeys::getInstance();
@@ -41,12 +47,12 @@ if (!empty($arResult["TICKET"])):
 	<tr>
 		<th><?=GetMessage("SUP_TICKET")?></th>
 	</tr>
-	
-	
+
+
 
 	<tr>
 		<td>
-		
+
 		<?=GetMessage("SUP_SOURCE")." / ".GetMessage("SUP_FROM")?>:
 
 			<?if (strlen($arResult["TICKET"]["SOURCE_NAME"])>0):?>
@@ -66,7 +72,7 @@ if (!empty($arResult["TICKET"])):
 			<?endif?>
 		<br />
 
-		
+
 		<?=GetMessage("SUP_CREATE")?>: <?=$arResult["TICKET"]["DATE_CREATE"]?> 
 
 		<?if (strlen($arResult["TICKET"]["CREATED_MODULE_NAME"])<=0 || $arResult["TICKET"]["CREATED_MODULE_NAME"]=="support"):?>
@@ -78,7 +84,7 @@ if (!empty($arResult["TICKET"])):
 		<?endif?>
 		<br />
 
-		
+
 		<?if ($arResult["TICKET"]["DATE_CREATE"]!=$arResult["TICKET"]["TIMESTAMP_X"]):?>
 				<?=GetMessage("SUP_TIMESTAMP")?>: <?=$arResult["TICKET"]["TIMESTAMP_X"]?>
 
@@ -93,33 +99,32 @@ if (!empty($arResult["TICKET"])):
 				<br />
 		<?endif?>
 
-		
+
 		<? if (strlen($arResult["TICKET"]["DATE_CLOSE"])>0): ?>
 			<?=GetMessage("SUP_CLOSE")?>: <?=$arResult["TICKET"]["DATE_CLOSE"]?>
 		<?endif?>
 
-		
+
 		<?if (strlen($arResult["TICKET"]["STATUS_NAME"])>0) :?>
 				<?=GetMessage("SUP_STATUS")?>: <span title="<?=$arResult["TICKET"]["STATUS_DESC"]?>"><?=$arResult["TICKET"]["STATUS_NAME"]?></span><br />
 		<?endif;?>
 
-		
+
 		<?if (strlen($arResult["TICKET"]["CATEGORY_NAME"]) > 0):?>
 				<?=GetMessage("SUP_CATEGORY")?>: <span title="<?=$arResult["TICKET"]["CATEGORY_DESC"]?>"><?=$arResult["TICKET"]["CATEGORY_NAME"]?></span><br />
 		<?endif?>
 
-		
+
 		<?if(strlen($arResult["TICKET"]["CRITICALITY_NAME"])>0) :?>
 				<?=GetMessage("SUP_CRITICALITY")?>: <span title="<?=$arResult["TICKET"]["CRITICALITY_DESC"]?>"><?=$arResult["TICKET"]["CRITICALITY_NAME"]?></span><br />
 		<?endif?>
 
-		
 		<?if (intval($arResult["RESPONSIBLE_USER_ID"])>0):?>
 			<?=GetMessage("SUP_RESPONSIBLE")?>: [<?=$arResult["TICKET"]["RESPONSIBLE_USER_ID"]?>]
 			(<?=$arResult["TICKET"]["RESPONSIBLE_LOGIN"]?>) <?=$arResult["TICKET"]["RESPONSIBLE_NAME"]?><br />
 		<?endif?>
 
-		
+
 		<?if (strlen($arResult["TICKET"]["SLA_NAME"])>0) :?>
 			<?=GetMessage("SUP_SLA")?>: 
 			<span title="<?=$arResult["TICKET"]["SLA_DESCRIPTION"]?>"><?=$arResult["TICKET"]["SLA_NAME"]?></span>
@@ -144,11 +149,11 @@ if (!empty($arResult["TICKET"])):
 
 		<div class="support-float-quote">[&nbsp;<a href="#postform" OnMouseDown="javascript:SupQuoteMessage('quotetd<? echo $arMessage["ID"]; ?>')" title="<?=GetMessage("SUP_QUOTE_LINK_DESCR");?>"><?echo GetMessage("SUP_QUOTE_LINK");?></a>&nbsp;]</div>
 
-		
+
 		<div align="left"><b><?=GetMessage("SUP_TIME")?></b>: <?=$arMessage["DATE_CREATE"]?></div>
 		<b><?=GetMessage("SUP_FROM")?></b>:
 
-		
+
 		<?=$arMessage["OWNER_SID"]?>
 
 		<?if (intval($arMessage["OWNER_USER_ID"])>0):?>
@@ -158,7 +163,7 @@ if (!empty($arResult["TICKET"])):
 		<?endif?>
 		<br />
 
-		
+
 		<?
 		$aImg = array("gif", "png", "jpg", "jpeg", "bmp");
 		foreach ($arMessage["FILES"] as $arFile):
@@ -174,7 +179,7 @@ if (!empty($arResult["TICKET"])):
 		<br class="clear" />
 		<?endforeach?>
 
-		
+
 		<br /><div id="quotetd<? echo $arMessage["ID"]; ?>"><?=$arMessage["MESSAGE"]?></div>
 
 		</div>
@@ -201,7 +206,11 @@ if (!empty($arResult["TICKET"])):
 <input type="hidden" name="edit" value="1" />
 <table class="support-ticket-edit-form data-table">
 
-	<?if (empty($arResult["TICKET"])):?>
+	<?if (!$arResult["TICKET"]['ID']):
+
+//print "OK";
+
+?>
 	<thead>
 		<tr>
 			<th colspan="2"><?=GetMessage("SUP_TICKET")?></th>
@@ -209,6 +218,10 @@ if (!empty($arResult["TICKET"])):
 	</thead>
 
 	<tbody>
+	<tr>
+		<td class="field-name border-none"><span class="starrequired">*</span>Author email:</td>
+		<td class="border-none"><input type="text" name="OWNER_SID" value="<?=htmlspecialcharsbx($_REQUEST["OWNER_SID"])?>" size="48" maxlength="255" /></td>
+	</tr>
 	<tr>
 		<td class="field-name border-none"><span class="starrequired">*</span><?=GetMessage("SUP_TITLE")?>:</td>
 		<td class="border-none"><input type="text" name="TITLE" value="<?=htmlspecialcharsbx($_REQUEST["TITLE"])?>" size="48" maxlength="255" /></td>
