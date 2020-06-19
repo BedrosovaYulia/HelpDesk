@@ -28,7 +28,7 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 {
 	/*print "<pre>";
 	print_r($_REQUEST);
-print "</pre>";*/
+	print "</pre>";*/
 
 	//die();
 
@@ -38,7 +38,6 @@ print "</pre>";*/
 	{
 		if (strlen(trim($_REQUEST["TITLE"]))<=0){ 
 			$strError .= GetMessage("SUP_FORGOT_TITLE")."<br>";
-			//$_REQUEST["TITLE"]="Ticket created from Bitrix24";
 		}
 
 		if (strlen(trim($_REQUEST["MESSAGE"]))<=0) 
@@ -46,7 +45,6 @@ print "</pre>";*/
 		
 		if (strlen(trim($_REQUEST["OWNER_SID"]))<=0){ 
 			$strError .= "Please fill email in the Author email field"."<br>";
-			//$_REQUEST["TITLE"]="Ticket created from Bitrix24";
 		}
 	}
 
