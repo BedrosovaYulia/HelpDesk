@@ -50,8 +50,8 @@ class HelpDeskExtension
 
 	function OnAfterTicketAddHandler($arFields)
     {
-		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-		AddMessage2Log($arFields, "after_ticket_add");
+		//define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+		//AddMessage2Log($arFields, "after_ticket_add");
 		
 		$headerArr = explode("\n", $arFields['EXTERNAL_FIELD_1']);
 		foreach ($headerArr as $str) {
@@ -60,13 +60,13 @@ class HelpDeskExtension
 		  }
 		}
 		
-		AddMessage2Log($cc, "before_ticket_add");
+		//AddMessage2Log($cc, "before_ticket_add");
 		
 		$text=$arFields['EXTERNAL_FIELD_1'];
 		$pattern = "/[-a-z0-9!#$%&'*_`{|}~]+[-a-z0-9!#$%&'*_`{|}~\.=?]*@[a-zA-Z0-9_-]+[a-zA-Z0-9\._-]+/i";
 		preg_match_all($pattern, $cc, $result);
 		
-		AddMessage2Log($result, "before_ticket_add_emails");
+		//AddMessage2Log($result, "before_ticket_add_emails");
 		
 		if (count($result[0])>0){
 			$bcc="";
@@ -77,7 +77,7 @@ class HelpDeskExtension
 				
 			}
 			self::$disableHandler = true;
-			AddMessage2Log($bcc, "before_ticket_add_bcc");
+			//AddMessage2Log($bcc, "before_ticket_add_bcc");
 			
 			$arFields2['UF_TICKET_CC']=$bcc;
 			CTicket::Set($arFields2, $MID, $id=$arFields['ID'], $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
@@ -211,8 +211,8 @@ class HelpDeskExtension
 	   
 	   //$disableHandler ?
 	   
-		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-		AddMessage2Log($TaskID, "task_updated");
+		//define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
+		//AddMessage2Log($TaskID, "task_updated");
 		$TicketID=self::GetTicketIDByTask($TaskID,25);
 		if ($TicketID>0){
 			if (CModule::IncludeModule("tasks"))
@@ -221,8 +221,8 @@ class HelpDeskExtension
 				if ($arTask = $rsTask->GetNext())
 				{	
 					//AddMessage2Log($arTask, "all_task_fields");
-					AddMessage2Log($arTask['STATUS'], "task_status");
-					AddMessage2Log($arTask['RESPONSIBLE_ID'], "task_responsible");
+					//AddMessage2Log($arTask['STATUS'], "task_status");
+					//AddMessage2Log($arTask['RESPONSIBLE_ID'], "task_responsible");
 					//change ticket responsible and status
 					if (CModule::IncludeModule("support")){
 						$arFields = array(
@@ -240,7 +240,7 @@ class HelpDeskExtension
 						$arFields["RESPONSIBLE_USER_ID"]=$arTask['RESPONSIBLE_ID'];
 						
 						CTicket::Set($arFields, $MID, $id=$TicketID, $checkRights="N", $sendEmailToAuthor="N", $sendEmailToTechsupport="N");
-						AddMessage2Log($arFields, "ticket_updated_after_task_updated");
+						//AddMessage2Log($arFields, "ticket_updated_after_task_updated");
 						//updating responsible in List
 							
 							
@@ -263,7 +263,7 @@ class HelpDeskExtension
 		if ($TaskID>0){
 			
 			define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
-			AddMessage2Log($arFields, "support_init_update");
+			//AddMessage2Log($arFields, "support_init_update");
 
 			//get ticket details
 			$ResponsiblePersonID=1;
@@ -297,13 +297,13 @@ class HelpDeskExtension
 				
 				//set task priority
 				if ($arFields['MODIFIED_MODULE_NAME']=='mail'){
-					$arTaskFields = array('PRIORITY' => 2); 
+					$arTaskFields['PRIORITY']= 2; 
 				}
 				elseif($arTicket['LAST_MESSAGE_BY_SUPPORT_TEAM']=='Y'){
-					$arTaskFields = array('PRIORITY' => 0); 
+					$arTaskFields['PRIORITY']= 0; 
 				}
 				
-				
+				AddMessage2Log($arTaskFields, "update task after ticket close");
 				
 				$arTaskFields['RESPONSIBLE_ID']=$ResponsiblePersonID;
 				
