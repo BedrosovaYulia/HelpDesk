@@ -28,16 +28,18 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 {
 	/*print "<pre>";
 	print_r($_REQUEST);
-	print "</pre>";
-	
-	die();*/
-	
+print "</pre>";*/
+
+	//die();
+
 	$ID = intval($_REQUEST["ID"]);
 
 	if ($ID <=0)
 	{
-		if (strlen(trim($_REQUEST["TITLE"]))<=0) 
+		if (strlen(trim($_REQUEST["TITLE"]))<=0){ 
 			$strError .= GetMessage("SUP_FORGOT_TITLE")."<br>";
+			//$_REQUEST["TITLE"]="Ticket created from Bitrix24";
+		}
 
 		if (strlen(trim($_REQUEST["MESSAGE"]))<=0) 
 			$strError .= GetMessage("SUP_FORGOT_MESSAGE")."<br>";
@@ -112,14 +114,19 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 				'PUBLIC_EDIT_URL'			=> $APPLICATION->GetCurPage(),
 				'RESPONSIBLE_USER_ID' => $_REQUEST['RESPONSIBLE_USER_ID']
 			);
-			
-			
+
+			if (strlen($_REQUEST['OWNER_SID'])>0){
+				$arFields['OWNER_SID']=$_REQUEST['OWNER_SID'];
+
+			}
+
+
 			if (strlen($_REQUEST["save_task_me"])>0){
 				global $USER;
 				$arFields['RESPONSIBLE_USER_ID']=$USER->GetID();
 			}
-			
-			
+
+
 
 			foreach( $_REQUEST as $k => $v )
 			{
@@ -130,12 +137,12 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 			}
 
 			$ID = CTicket::SetTicket($arFields, $ID, "Y", $NOTIFY = "Y");
-			
-			
+
+
 			//**************************************create task if need****************************************
-			
+
 			$rsMessage = CTicket::GetMessageList($by="s_id", $order="asc", array("TICKET_ID" => $ID), $CHECK_RIGHTS="N");
-			
+
 			$FirstMessage="";
 			if($arMessage = $rsMessage->GetNext())
 			{
@@ -144,26 +151,26 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 				print "</pre>";*/
 				$FirstMessage=$arMessage['~MESSAGE'];
 			}
-			
+
 			//die();
-			
+
 			if (strlen($_REQUEST["save_task_me"])>0 ||  strlen($_REQUEST["save_task_resp"])>0){
-				
+
 				$ResponsiblePersonID=$arFields['RESPONSIBLE_USER_ID'];
-				
+
 				CModule::IncludeModule("support");
 				$rsTicket=CTicket::GetByID($ID);
 				$arTicket = $rsTicket->GetNext();
-				
-				
-				
+
+
+
 				$arFields=$arTicket;
-				
-				/*print "<pre>";
+
+				print "<pre>";
 				print_r($arFields);
-				print "</pre>";*/
-				
-				
+				print "</pre>";
+
+
 				define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/upload/ticket_log.txt");
 				AddMessage2Log($arFields, "support_init");
 
@@ -173,13 +180,13 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 				preg_match_all($pattern, $text, $result);
 				$r = array_unique(array_map(function ($i) { return $i[0]; }, $result));
 				$sEmail=$r[0];
-				
+
 				//print $sEmail."<br/>";
-				
+
 				AddMessage2Log($sEmail, "email");
 
 				$ContactID=-1;
-			
+
 
 				CModule::IncludeModule('crm');
 				$rsContact = CCrmFieldMulti::GetList(
@@ -218,7 +225,7 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 					$arNewContactParams['LAST_NAME']=$arFields["~OWNER_SID"];
 					$arNewContactParams['TYPE_ID'] ='CLIENT';
 					$arNewContactParams['ASSIGNED_BY_ID'] = $ResponsiblePersonID;
-			
+
 
 
 					$ContactID=$ct->Add($arNewContactParams, true, array('DISABLE_USER_FIELD_CHECK' => true));
@@ -231,22 +238,25 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 					}
 
 				}
-				
+
 				//print $ContactID."<br/>";
 				//print $ResponsiblePersonID."<br/>";
-				
+
 				//die();
-				
-				
+
+
 				//TaskCreation
 				if (CModule::IncludeModule("tasks") && $ContactID>0){
+					$entities = get_html_translation_table(HTML_ENTITIES);
+					$translate = array_flip($entities);
+					$string123 = "&amp;";
 					$arFieldsTask = Array(
-						"TITLE" => "Helpdesk#".$arFields['ID']."-".$sEmail."-".$arFields['TITLE'],
+						"TITLE" => "HD#".$arFields['ID'].": ".$arFields['TITLE'],
 						"DESCRIPTION" => $FirstMessage,
 						"RESPONSIBLE_ID" => $ResponsiblePersonID,
 						"UF_CRM_TASK" => array('C_'.$ContactID),
 						"GROUP_ID"=>2,
-						"UF_TICKET_LINK" => "https://".$_SERVER['SERVER_NAME']."/company/helpdesk/?ID=".$arFields['ID']."&edit=1",
+						"UF_TICKET_LINK" => "https://".$_SERVER['SERVER_NAME']."/company/helpdesk/?ID=".$arFields['ID'].strtr($string123, $translate)."edit=1",
 						"PRIORITY"=>2,
 						);
 
@@ -289,15 +299,15 @@ if ((strlen($_REQUEST["save"])>0 || strlen($_REQUEST["save_task_me"])>0 || strle
 						else
 							AddMessage2Log($el->LAST_ERROR, "list item creation error");
 				   }
-			
-			
+
+
 			}
-			
-		
-			
+
+
+
 			//***********************end task creation*************************************************
-			
-			
+
+
 			if (intval($ID)>0)
 			{
 				if (strlen($_REQUEST["save"])>0)
@@ -378,11 +388,6 @@ if( isset( $arParams["SET_SHOW_USER_FIELD"] ) )
 		}
 	}
 }
-
-/*print "<pre>";
-print_r($UFA );
-print "</pre>";*/
-
 $arParams["SET_SHOW_USER_FIELD_T"] = $UFAT;
 $rsTicket = CTicket::GetByID($arParams["ID"], SITE_ID, $check_rights = "Y", $get_user_name = "N", $get_extra_names = "N", array( "SELECT" => $UFA ) );
 
