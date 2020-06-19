@@ -43,6 +43,11 @@ print "</pre>";*/
 
 		if (strlen(trim($_REQUEST["MESSAGE"]))<=0) 
 			$strError .= GetMessage("SUP_FORGOT_MESSAGE")."<br>";
+		
+		if (strlen(trim($_REQUEST["OWNER_SID"]))<=0){ 
+			$strError .= "Please fill email in the Author email field"."<br>";
+			//$_REQUEST["TITLE"]="Ticket created from Bitrix24";
+		}
 	}
 
 	$arFILES = array();
@@ -135,6 +140,12 @@ print "</pre>";*/
 					$arFields[$k] = $v;
 				}
 			}
+			
+			/*print "<pre>";
+			print_r($arFields);
+			print "</pre>";
+			
+			die();*/
 
 			$ID = CTicket::SetTicket($arFields, $ID, "Y", $NOTIFY = "Y");
 
