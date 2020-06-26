@@ -113,15 +113,24 @@ $aSort = $grid_options->GetSorting(array("sort"=>array("id"=>"desc"), "vars"=>ar
 $aNav = $grid_options->GetNavParams(array("nPageSize"=>$arParams["TICKETS_PER_PAGE"]));
 $aSortArg = each($aSort["sort"]);
 
-/*print "<pre>";
-print_r($arResult["FILTER"]);
-print "</pre>";*/
+
 
 $aFilter = $grid_options->GetFilter($arResult["FILTER"]);
 
 $aSortVal = $aSort['sort'];
-$sort_order = current($aSortVal);
-$sort_by = key($aSortVal);
+//$sort_order = current($aSortVal);
+//$sort_by = key($aSortVal);
+
+foreach ($aSortVal as $skey=>$sval){
+	
+	$sort_order = $sval;
+	$sort_by = $skey;
+	
+}
+
+/*print "<pre>";
+print_r($aSortVal);
+print "</pre>";*/
 
 
 if (strlen($arParams["SITE_ID"]) > 0)
@@ -147,6 +156,7 @@ $arGuestsPref = array("OWNER", "CREATED");
 
 while ($arTicket = $rsTickets->GetNext())
 {
+	
 	$arTickets[] = $arTicket;
 
 	foreach($arUsersPref as $cup)
